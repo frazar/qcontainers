@@ -123,6 +123,74 @@ subroutine test_qtreetbl_2()
     call assert_true(haskey)
 end subroutine
 
+subroutine test_qtreetbl_3()
+    use qtreetbl_m
+    implicit none
+
+    type(qtreetbl_t) :: qt
+    integer :: isiz
+
+    print *, ""
+    print *, "Start of test_qtreetbl_3"
+
+    isiz = storage_size(isiz) / 8
+    call qt%new(isiz)
+
+    print *, 'Insert "0 0 0 0 0 0 0 0 0 0 0 0"'
+    call qt%put("0 0 0 0 0 0 0 0 0 0 0 0", 0)
+
+    print *, 'Remove "0 0 0 0 0 0 0 0 0 0 0 0"'
+    call qt%remove("0 0 0 0 0 0 0 0 0 0 0 0")
+
+    print *, 'Insert "0 0 0 0 0 0 0 0 0 0 0 0"'
+    call qt%put("0 0 0 0 0 0 0 0 0 0 0 0", 0)
+
+    print *, 'Insert "0 0 0 0 0 0 0 0 0 0 1 0"'
+    call qt%put("0 0 0 0 0 0 0 0 0 0 1 0", 0)
+
+    print *, 'Remove "0 0 0 0 0 0 0 0 0 0 1 0"'
+    call qt%remove("0 0 0 0 0 0 0 0 0 0 1 0")
+
+    print *, 'Insert "0 0 0 0 0 0 0 0 0 0 1 0"'
+    call qt%put("0 0 0 0 0 0 0 0 0 0 1 0", 0)
+
+    print *, 'Insert "0 0 0 0 0 0 0 0 0 1 1 0"'
+    call qt%put("0 0 0 0 0 0 0 0 0 1 1 0", 0)
+
+    print *, 'Insert "0 0 0 0 0 0 0 0 0 0 1 1"'
+    call qt%put("0 0 0 0 0 0 0 0 0 0 1 1", 0)
+
+    print *, 'Remove "0 0 0 0 0 0 0 0 0 0 1 1"'
+    call qt%remove("0 0 0 0 0 0 0 0 0 0 1 1")
+
+    print *, 'Insert "0 0 0 0 0 0 0 0 0 0 1 1"'
+    call qt%put("0 0 0 0 0 0 0 0 0 0 1 1", 0)
+
+    print *, 'Insert "0 0 1 0 0 0 0 0 0 0 1 1"'
+    call qt%put("0 0 1 0 0 0 0 0 0 0 1 1", 0)
+
+    print *, 'Insert "0 0 0 0 0 0 1 0 0 0 1 1"'
+    call qt%put("0 0 0 0 0 0 1 0 0 0 1 1", 0)
+
+    print *, 'Insert "0 0 0 0 0 0 0 0 0 1 1 1"'
+    call qt%put("0 0 0 0 0 0 0 0 0 1 1 1", 0)
+
+    print *, 'Remove "0 0 0 0 0 0 0 0 0 1 1 0"'
+    call qt%remove("0 0 0 0 0 0 0 0 0 1 1 0")
+
+    print *, 'Insert "0 0 0 0 0 0 0 0 0 1 1 0"'
+    call qt%put("0 0 0 0 0 0 0 0 0 1 1 0", 0)
+
+    print *, 'Insert "1 0 0 0 0 0 0 0 0 1 1 0"'
+    call qt%put("1 0 0 0 0 0 0 0 0 1 1 0", 0)
+
+    print *, 'Insert "0 0 0 0 0 0 0 0 1 1 1 0"'
+    call qt%put("0 0 0 0 0 0 0 0 1 1 1 0", 0)
+
+    print *, 'Remove "0 0 0 0 0 0 0 0 1 1 1 0"'
+    call qt%remove("0 0 0 0 0 0 0 0 1 1 1 0")
+end subroutine
+
 subroutine testing_qtreetbl()
     use assert_test_m
     implicit none
@@ -133,6 +201,7 @@ subroutine testing_qtreetbl()
 
     call test_qtreetbl_1()
     call test_qtreetbl_2()
+    call test_qtreetbl_3()
 
     call assert_print_summary()
 end subroutine
