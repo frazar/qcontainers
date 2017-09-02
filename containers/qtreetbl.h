@@ -105,6 +105,8 @@ extern void qtreetbl_free(qtreetbl_t *tbl);
 extern int qtreetbl_byte_cmp(const void *name1, size_t namesize1,
                              const void *name2, size_t namesize2);
 extern bool qtreetbl_debug(qtreetbl_t *tbl, FILE *out);
+extern void qtreetbl_print(qtreetbl_t *tbl);
+extern void qtreetbl_check(qtreetbl_t *tbl);
 
 /**
  * qtreetbl container object

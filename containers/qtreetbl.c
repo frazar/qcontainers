@@ -342,6 +342,8 @@ bool qtreetbl_put_by_obj(qtreetbl_t *tbl, const void *name, size_t namesize,
     }
     root->red = false;
     tbl->root = root;
+    qtreetbl_check(tbl);
+
     qtreetbl_unlock(tbl);
 
     return true;
@@ -494,6 +496,9 @@ bool qtreetbl_remove_by_obj(qtreetbl_t *tbl, const void *name, size_t namesize) 
     if (tbl->root)
         tbl->root->red = false;
     bool removed = (errno != ENOENT) ? true : false;
+
+    qtreetbl_check(tbl);
+
     qtreetbl_unlock(tbl);
 
     return removed;
@@ -862,6 +867,133 @@ bool qtreetbl_debug(qtreetbl_t *tbl, FILE *out) {
     qtreetbl_unlock(tbl);
 
     return true;
+}
+
+/**
+ * Display the tree structure from the node pointed by `obj` and down.
+ *
+ * @param tbl   A pointer to a node of the tree.
+ * @param depth The depth of the node in the tree.
+ *              The depth of the tree root is 0.
+ *
+ */
+void print_node(qtreetbl_obj_t *obj, int depth) {
+    // Skip tree-leaves
+    if (!obj) return;
+
+    // 4-spaces indentation for each node level
+    for (int i = 0; i < depth; i++) {
+        printf("    ");
+    }
+
+    // Print the red-ness of the node
+    printf("R=%c W= ", (obj->red) ? 'Y' : 'N', obj->name);
+
+    // Print the content of the node
+    for (int i = 0; i < obj->namesize; i++) {
+        printf("%c", ((char *) obj->name)[i]);
+    }
+
+    // No more data to print for this node, go to next line.
+    printf("\n");
+
+    // Recursive call to display the children
+    print_node(obj->left, depth + 1);
+    print_node(obj->right, depth + 1);
+}
+
+/**
+ * qtreetbl->print(): Display the tree structure.
+ *
+ * @param tbl   qtreetbl_t container pointer.
+ *
+ */
+void qtreetbl_print(qtreetbl_t *tbl) {
+
+    qtreetbl_lock(tbl);
+
+    print_node(tbl->root, 0);
+
+    qtreetbl_unlock(tbl);
+}
+
+/**
+ * Verifies that RULE 4 of the red-black tree is verified for the node pointed
+ * by `obj` and all its children.
+ *
+ * Rule 4 states that no red node shall have a red child.
+ *
+ * @param tbl A pointer to the tree object.
+ * @param obj A pointer to a node of the tree object.
+ */
+void node_check_rule4(qtreetbl_t *tbl, qtreetbl_obj_t *obj) {
+    // RULE 4: No red node has a red child
+
+    if (obj == NULL) return;
+
+    if (is_red(obj)) {
+        if (is_red(obj->right) || is_red(obj->left)) {
+            printf("ERROR: Rule 4 violated.\n");
+            printf("Red node with key '%s' has at least one red child.\n", obj->name);
+            print_node(tbl->root, 0);
+
+            exit(1);
+        }
+    }
+
+    node_check_rule4(tbl, obj->right);
+    node_check_rule4(tbl, obj->left);
+}
+
+/**
+ * Verifies that RULE 5 of the red-black tree is verified for the node pointed
+ * by `obj` and all its children.
+ *
+ * Rule 5 states that every path from the root of the tree to any leaf of the
+ * tree has the same number of black nodes.
+ *
+ * @param tbl A pointer to the tree object.
+ * @param obj A pointer to a node of the tree object.
+ */
+int node_check_rule5(qtreetbl_t *tbl, qtreetbl_obj_t *obj) {
+    int path_len;
+
+    if (obj == NULL) {
+        path_len = 0;
+    } else {
+        int right_path_len = node_check_rule5(tbl, obj->right);
+        int left_path_len = node_check_rule5(tbl, obj->left);
+
+        if (right_path_len != left_path_len) {
+            printf("ERROR: Rule 5 violated.");
+            print_node(tbl->root, 0);
+            exit(1);
+        } else {
+            path_len = right_path_len;
+
+            if (!is_red(obj)) path_len++;
+        }
+    }
+
+    return path_len;
+}
+
+/**
+ * Verifies that the (some) invariants of the red-black tree are satisfied.
+ *
+ * @param tbl A pointer to the tree object to check.
+ */
+void qtreetbl_check(qtreetbl_t *tbl) {
+
+    printf("Checking tree... ");
+    if (tbl == NULL) return;
+
+
+    node_check_rule4(tbl, tbl->root);
+    node_check_rule5(tbl, tbl->root);
+
+
+    printf("Done.\n");
 }
 
 #ifndef _DOXYGEN_SKIP
